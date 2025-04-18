@@ -40,38 +40,48 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
+    
     try {
+      // Create the lead object
       const lead: Lead = {
         name: values.name,
         email: values.email,
-        phone: values.phone || undefined, // Changed from null to undefined
+        phone: values.phone || '',
         lead_source: leadSource,
         consent: values.consent,
       };
 
-      // Log the lead data for debugging
+      // Log for debugging
       console.log('Submitting lead:', lead);
 
+      // Insert the lead into Supabase
       const { data, error } = await supabase
         .from('leads')
-        .insert([lead]) // Ensure we're passing an array
+        .insert([lead])
         .select();
 
+      // Handle errors
       if (error) {
         console.error('Supabase error:', error);
-        throw error;
+        throw new Error(`Failed to submit form: ${error.message}`);
       }
 
+      // Check if we got data back
       if (!data || data.length === 0) {
-        throw new Error('No data returned from Supabase');
+        console.error('No data returned from Supabase');
+        throw new Error('No data returned from submission');
       }
 
+      // Success! Show toast and call the success handler
+      console.log('Form submitted successfully:', data[0]);
       toast.success('Thank you for signing up!');
       onSuccess(data[0] as Lead);
     } catch (error) {
+      // Handle any errors
       console.error('Error submitting form:', error);
       toast.error('Something went wrong. Please try again.');
     } finally {
+      // Always reset the submitting state
       setIsSubmitting(false);
     }
   };
@@ -84,11 +94,11 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Your Name</FormLabel>
+              <FormLabel className="text-white">Your Name</FormLabel>
               <FormControl>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="John Doe" className="pl-10" {...field} />
+                  <Input placeholder="John Doe" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -101,11 +111,11 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel className="text-white">Email Address</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="you@example.com" className="pl-10" {...field} />
+                  <Input placeholder="you@example.com" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -118,11 +128,11 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number (Optional)</FormLabel>
+              <FormLabel className="text-white">Phone Number (Optional)</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="+1 (555) 123-4567" className="pl-10" {...field} />
+                  <Input placeholder="+1 (555) 123-4567" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
                 </div>
               </FormControl>
               <FormMessage />
@@ -139,10 +149,11 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel className="text-sm font-normal">
+                <FormLabel className="text-sm font-normal text-white">
                   I agree to receive the free guide and occasional updates
                 </FormLabel>
               </div>
@@ -152,7 +163,7 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
 
         <Button 
           type="submit" 
-          className="w-full group transition-all duration-300 ease-in-out" 
+          className="w-full group transition-all duration-300 ease-in-out bg-indigo-600 hover:bg-indigo-700" 
           disabled={isSubmitting}
           size="lg"
         >

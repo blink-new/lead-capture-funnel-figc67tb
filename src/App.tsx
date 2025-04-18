@@ -1,18 +1,19 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Toaster } from 'sonner';
 import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { SuccessState } from './components/SuccessState';
 import { LeadMagnetHeader } from './components/LeadMagnetHeader';
 import { ProgressIndicator } from './components/ProgressIndicator';
 import { Lead } from './lib/supabase';
-import { Toaster } from 'sonner';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [lead, setLead] = useState<Lead | null>(null);
   
   const handleFormSuccess = (submittedLead: Lead) => {
+    console.log('Form success handler called with:', submittedLead);
     setLead(submittedLead);
     setCurrentStep(1);
   };
@@ -79,7 +80,7 @@ function App() {
           <p className="mt-1">We respect your privacy and will never share your information.</p>
         </div>
       </div>
-      <Toaster />
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

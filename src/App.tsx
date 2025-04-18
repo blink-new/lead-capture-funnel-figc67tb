@@ -6,7 +6,7 @@ import { SuccessState } from './components/SuccessState';
 import { LeadMagnetHeader } from './components/LeadMagnetHeader';
 import { ProgressIndicator } from './components/ProgressIndicator';
 import { Lead } from './lib/supabase';
-import { Toaster } from './components/ui/sonner';
+import { Toaster } from 'sonner';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);

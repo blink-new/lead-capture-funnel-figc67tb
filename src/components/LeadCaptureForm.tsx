@@ -44,15 +44,26 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
       const lead: Lead = {
         name: values.name,
         email: values.email,
-        phone: values.phone || null,
+        phone: values.phone || undefined, // Changed from null to undefined
         lead_source: leadSource,
         consent: values.consent,
       };
 
-      const { data, error } = await supabase.from('leads').insert(lead).select();
+      // Log the lead data for debugging
+      console.log('Submitting lead:', lead);
+
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([lead]) // Ensure we're passing an array
+        .select();
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No data returned from Supabase');
       }
 
       toast.success('Thank you for signing up!');
@@ -145,7 +156,7 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
           disabled={isSubmitting}
           size="lg"
         >
-          Get Your Free Guide
+          {isSubmitting ? 'Submitting...' : 'Get Your Free Guide'}
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </form>

@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Checkbox } from './ui/checkbox';
-import { supabase, Lead } from '../lib/supabase';
+import { insertLead, Lead } from '../lib/supabase';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -52,33 +52,26 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
       };
 
       // Log for debugging
+      console.log('Form values:', values);
       console.log('Submitting lead:', lead);
 
-      // Insert the lead into Supabase
-      const { data, error } = await supabase
-        .from('leads')
-        .insert([lead])
-        .select();
+      // Insert the lead using our helper function
+      const { data, error } = await insertLead(lead);
 
       // Handle errors
       if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(`Failed to submit form: ${error.message}`);
-      }
-
-      // Check if we got data back
-      if (!data || data.length === 0) {
-        console.error('No data returned from Supabase');
-        throw new Error('No data returned from submission');
+        console.error('Error submitting form:', error);
+        toast.error('Something went wrong. Please try again.');
+        return;
       }
 
       // Success! Show toast and call the success handler
-      console.log('Form submitted successfully:', data[0]);
+      console.log('Form submitted successfully:', data);
       toast.success('Thank you for signing up!');
-      onSuccess(data[0] as Lead);
+      onSuccess(data!);
     } catch (error) {
-      // Handle any errors
-      console.error('Error submitting form:', error);
+      // Handle any unexpected errors
+      console.error('Unexpected error submitting form:', error);
       toast.error('Something went wrong. Please try again.');
     } finally {
       // Always reset the submitting state
@@ -97,11 +90,15 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
               <FormLabel className="text-white">Your Name</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="John Doe" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 h-4 w-4" />
+                  <Input 
+                    placeholder="John Doe" 
+                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40" 
+                    {...field} 
+                  />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-pink-300" />
             </FormItem>
           )}
         />
@@ -114,11 +111,15 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
               <FormLabel className="text-white">Email Address</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="you@example.com" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 h-4 w-4" />
+                  <Input 
+                    placeholder="you@example.com" 
+                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40" 
+                    {...field} 
+                  />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-pink-300" />
             </FormItem>
           )}
         />
@@ -131,11 +132,15 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
               <FormLabel className="text-white">Phone Number (Optional)</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input placeholder="+1 (555) 123-4567" className="pl-10 bg-white/10 border-white/20 text-white" {...field} />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 h-4 w-4" />
+                  <Input 
+                    placeholder="+1 (555) 123-4567" 
+                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40" 
+                    {...field} 
+                  />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-pink-300" />
             </FormItem>
           )}
         />
@@ -149,7 +154,7 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                  className="data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                  className="border-white/40 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
@@ -163,7 +168,7 @@ export function LeadCaptureForm({ onSuccess, leadSource = 'website' }: LeadCaptu
 
         <Button 
           type="submit" 
-          className="w-full group transition-all duration-300 ease-in-out bg-indigo-600 hover:bg-indigo-700" 
+          className="w-full group transition-all duration-300 ease-in-out bg-indigo-600 hover:bg-indigo-700 text-white" 
           disabled={isSubmitting}
           size="lg"
         >

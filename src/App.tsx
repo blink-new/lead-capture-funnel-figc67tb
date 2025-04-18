@@ -64,11 +64,13 @@ function App() {
                   transition={{ duration: 0.3 }}
                   className="flex justify-center"
                 >
-                  <SuccessState 
-                    lead={lead!} 
-                    downloadUrl={leadMagnetConfig.downloadUrl}
-                    downloadFileName={leadMagnetConfig.downloadFileName}
-                  />
+                  {lead && (
+                    <SuccessState 
+                      lead={lead} 
+                      downloadUrl={leadMagnetConfig.downloadUrl}
+                      downloadFileName={leadMagnetConfig.downloadFileName}
+                    />
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
